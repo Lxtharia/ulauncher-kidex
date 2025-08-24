@@ -5,7 +5,7 @@ from ulauncher.api.shared.item.ExtensionResultItem import ExtensionResultItem
 from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
 from ulauncher.api.shared.action.ExtensionCustomAction import ExtensionCustomAction
 from ulauncher.api.shared.action.HideWindowAction import HideWindowAction
-
+from src.functions import KidexErrorException, KidexWarningException, get_find_results
 
 class KidexExtension(Extension):
 
@@ -18,13 +18,27 @@ class KidexExtension(Extension):
 class KeywordQueryEventListener(EventListener):
 
     def on_event(self, event, extension):
+        query = event.get_argument() or str()
         items = []
-        data = {}
-        for i in range(5):
-            items.append(ExtensionResultItem(icon='images/icon.png',
-                                             name='Item %s' % i,
-                                             description='Item description %s' % i,
-                                             on_enter=ExtensionCustomAction(data, keep_app_open=True)))
+
+        try:
+            data = get_find_results(query)
+            for entry in data:
+                items.append(ExtensionResultItem(icon='images/icon.png',
+                                                 name='%s' % entry.basename,
+                                                 description='At %s' % entry.path,
+                                                 on_enter=ExtensionCustomAction({}, keep_app_open=True)))
+
+        except KidexWarningException as e:
+            items.append(ExtensionResultItem(
+                icon='images/icon.png',
+                name='Warning: %s' % e,
+            ))
+        except KidexErrorException as e:
+            items.append(ExtensionResultItem(
+                icon='images/icon.png',
+                name='Error: %s' % e,
+            ))
 
         return RenderResultListAction(items)
 
