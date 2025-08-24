@@ -19,10 +19,11 @@ class KeywordQueryEventListener(EventListener):
 
     def on_event(self, event, extension):
         query = event.get_argument() or str()
+        max_results = int(extension.preferences["max_results"])
         items = []
 
         try:
-            data = get_find_results(query)
+            data = get_find_results(query, limit=max_results)
             for entry in data:
                 items.append(ExtensionResultItem(icon='images/icon.png',
                                                  name='%s' % entry.basename,

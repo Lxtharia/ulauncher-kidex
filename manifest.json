@@ -14,6 +14,13 @@
       "name": "Find",
       "description": "Kidex Keyword",
       "default_value": "f"
+    },
+    {
+      "id": "max_results",
+      "type": "input",
+      "name": "Max results to show",
+      "description": "Set how many results should be shown.",
+      "default_value": "20"
     }
   ]
 }

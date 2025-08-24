@@ -25,13 +25,13 @@ def get_find_results(query_string: str, limit: int = 100) -> list[IndexEntry]:
         result: list[dict[str,str]] = json.loads(process_result)
         i = 0
         for entry in reversed(result):
-            i += 1
-            if i >= limit:
-                break
             results.append(IndexEntry(
                 entry['path'],
                 "dir" if entry['directory'] else "file"
             ))
+            i += 1
+            if i >= limit:
+                break
     except subprocess.CalledProcessError:
         raise KidexErrorException("Kidex not running or something")
 
