@@ -1,0 +1,19 @@
+{
+  "required_api_version": "^2.0.0",
+  "name": "Kidex File Search",
+  "description": "Plugin to search files using the kidex indexing daemon via kidex-client.",
+  "developer_name": "Lxtharia",
+  "icon": "images/icon.png",
+  "options": {
+    "query_debounce": 0.1
+  },
+  "preferences": [
+    {
+      "id": "kidex_keyword",
+      "type": "keyword",
+      "name": "Find",
+      "description": "Kidex Keyword",
+      "default_value": "f"
+    }
+  ]
+}
