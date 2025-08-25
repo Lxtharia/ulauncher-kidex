@@ -19,12 +19,13 @@ class KeywordQueryEventListener(EventListener):
 
     def on_event(self, event, extension):
         query = event.get_argument() or str()
+        binary_path = extension.preferences["path_to_binary"] or "kidex-client"
         # TODO: Don't query, if the query string is empty
         max_results = int(extension.preferences["max_results"])
         items = []
 
         try:
-            data = get_find_results(query, limit=max_results)
+            data = get_find_results(query, limit=max_results, command=binary_path)
             for entry in data:
                 items.append(ExtensionResultItem(icon='images/icon.png',
                                                  name='%s' % entry.basename,

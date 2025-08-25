@@ -21,6 +21,13 @@
       "name": "Max results to show",
       "description": "Set how many results should be shown.",
       "default_value": "20"
+    },
+    {
+      "id": "path_to_binary",
+      "type": "input",
+      "name": "Custom binary path",
+      "description": "If ulauncher can't find kidex-client, you can provide the path manually",
+      "default_value": ""
     }
   ]
 }

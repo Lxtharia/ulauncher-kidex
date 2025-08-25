@@ -28,10 +28,12 @@ class IndexEntry:
         pass
 
 
-def get_find_results(query_string: str, limit: int = 100) -> list[IndexEntry]:
+def get_find_results(query_string: str,
+                     command: str = "kidex-client",
+                     limit: int = 100) -> list[IndexEntry]:
     results = []
     try:
-        process_result = subprocess.check_output(["kidex-client", "find", query_string])
+        process_result = subprocess.check_output([command, "find", query_string])
         result: list[dict[str,str]] = json.loads(process_result)
         i = 0
         for entry in reversed(result):
