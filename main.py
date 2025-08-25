@@ -19,6 +19,7 @@ class KeywordQueryEventListener(EventListener):
 
     def on_event(self, event, extension):
         query = event.get_argument() or str()
+        # TODO: Don't query, if the query string is empty
         max_results = int(extension.preferences["max_results"])
         items = []
 
@@ -33,15 +34,19 @@ class KeywordQueryEventListener(EventListener):
         except KidexWarningException as e:
             items.append(ExtensionResultItem(
                 icon='images/icon.png',
-                name='Warning: %s' % e,
+                name=('Warning: %s' % e.name),
+                description=str(e.desc),
             ))
+
         except KidexErrorException as e:
             items.append(ExtensionResultItem(
                 icon='images/icon.png',
-                name='Error: %s' % e,
+                name=('Error: %s' % e.name),
+                description=str(e.desc),
             ))
 
         return RenderResultListAction(items)
+
 
 class ItemEnterEventListener(EventListener):
     def on_event(self, event, extension):

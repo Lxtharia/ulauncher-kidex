@@ -12,7 +12,7 @@
       "id": "kidex_keyword",
       "type": "keyword",
       "name": "Find",
-      "description": "Kidex Keyword",
+      "description": "Find files with the kidex file indexer",
       "default_value": "f"
     },
     {
