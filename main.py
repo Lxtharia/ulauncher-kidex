@@ -8,8 +8,12 @@ from ulauncher.api.shared.action.ExtensionCustomAction import ExtensionCustomAct
 from ulauncher.api.shared.action.HideWindowAction import HideWindowAction
 from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAction
 from ulauncher.api.shared.action.OpenAction import OpenAction
-from src.functions import IndexEntry, KidexErrorException, KidexWarningException, get_find_results
+from ulauncher.api.shared.action.BaseAction import BaseAction
+from ulauncher.utils.image_loader import get_themed_icon_by_name, get_file_icon
+from src.functions import IndexEntry, KidexErrorException, KidexWarningException, get_find_results, lookup_icon
+import logging
 
+logger = logging.getLogger(__name__)
 
 class KidexExtension(Extension):
 
@@ -31,9 +35,9 @@ class KeywordQueryEventListener(EventListener):
         try:
             data = get_find_results(query, limit=max_results, command=binary_path)
             for entry in data:
-                items.append(ExtensionResultItem(icon='images/icon.png',
+                items.append(ExtensionResultItem(icon=entry.get_icon(),
                                                  name='%s' % entry.basename,
-                                                 description='At %s' % entry.path,
+                                                 description='%s' % entry.path.get_user_path(),
                                                  on_enter=ExtensionCustomAction(entry, keep_app_open=True)))
 
         except KidexWarningException as e:
@@ -59,25 +63,38 @@ class ItemEnterEventListener(EventListener):
 
         actions = [
             ExtensionSmallResultItem(
+                icon=lookup_icon("open-link", 64),
                 name="Open",
-                on_enter=OpenAction(entry.path)
+                on_enter=OpenAction(entry.path.get_abs_path())
             ),
             ExtensionSmallResultItem(
+                icon=lookup_icon("edit-copy", 64),
                 name="Copy Full Path",
-                on_enter=CopyToClipboardAction(entry.path)
-                ),
+                on_enter=CopyToClipboardAction(entry.path.get_abs_path())
+            ),
         ]
 
-        if entry.type == "directory":
-            actions += [
-            ]
+        if entry.is_dir():
+            actions += []
         else:
             actions += [
                 ExtensionSmallResultItem(
+                    icon=lookup_icon("go-parent-folder", 64),
                     name="Open parent directory",
                     on_enter=OpenAction(entry.parent_dir)
                 ),
             ]
+            ### {{{ Attempt to copy entire file to clipboard. Fails because CopyToClipboardAction only accepts text
+            # try:
+            #     with open(entry.path.get_abs_path(), 'rb') as f:
+            #         file_contents = f.read()
+            #         actions.append(ExtensionSmallResultItem(
+            #             name="Copy file",
+            #             on_enter=CopyToClipboardAction(file_contents)
+            #         ))
+            # except Exception as e:
+            #     logger.warning("Could not read file content: %s" % e)
+            # }}}
         return RenderResultListAction(actions)
 
 

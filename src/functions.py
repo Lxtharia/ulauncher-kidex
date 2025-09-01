@@ -1,12 +1,31 @@
 import os
 import subprocess
 import json
+import logging
+import gi
+from ulauncher.utils.Path import Path
 
-from ulauncher.api.shared.item.ResultItem import OnEnterCallback
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gio, Gtk # type: ignore
+logger = logging.getLogger(__name__)
 
+icon_theme = Gtk.IconTheme.get_default()
+def lookup_icon(icon_name, size):
+    filename = ""
+    icon_file = icon_theme.lookup_icon(icon_name , size , 0)
+    if icon_file != None:
+        filename = icon_file.get_filename()
+    else: 
+        logger.debug(f'Icon "{icon_name}" not found')
+    return filename
 
-def parse_index_entry():
-    pass
+def get_file_icon(path: Path, size):
+    if path.exists():
+        file = Gio.File.new_for_path(path.get_abs_path())
+        info = file.query_info('standard::icon' , 0 , Gio.Cancellable())
+        icon = info.get_icon().get_names()[0]
+        return lookup_icon(icon, size) 
+
 
 class ExtensionException(Exception):
     def __init__(self, name, desc=""):
@@ -17,18 +36,24 @@ class ExtensionException(Exception):
 class KidexErrorException(ExtensionException):
     pass
 
-
 class KidexWarningException(ExtensionException):
     pass
 
-
 class IndexEntry:
     def __init__(self, path: str, _type):
-        self.parent_dir = os.path.dirname(path)
-        self.basename = os.path.basename(path)
-        self.path = path
+        self.path = Path(path)
+        self.parent_dir = os.path.dirname(self.path.get_abs_path())
+        self.basename = self.path.get_basename()
         self.type = _type
-        pass
+
+    def is_dir(self) -> bool:
+        return self.path.is_dir()
+
+    def get_icon(self) -> str | None:
+        if self.is_dir():
+            return lookup_icon("folder", 64)
+        else:
+            return get_file_icon(self.path, 64)
 
 
 def get_find_results(query_string: str,
