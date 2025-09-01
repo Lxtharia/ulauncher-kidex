@@ -2,12 +2,14 @@ import os
 import subprocess
 import json
 
+from ulauncher.api.shared.item.ResultItem import OnEnterCallback
+
 
 def parse_index_entry():
     pass
 
 class ExtensionException(Exception):
-    def __init__(self, name, desc = ""):
+    def __init__(self, name, desc=""):
         self.name = name
         self.desc = desc
         super().__init__(name, desc)
@@ -21,10 +23,11 @@ class KidexWarningException(ExtensionException):
 
 
 class IndexEntry:
-    def __init__(self, path: str, type):
+    def __init__(self, path: str, _type):
+        self.parent_dir = os.path.dirname(path)
         self.basename = os.path.basename(path)
         self.path = path
-        self.type = type
+        self.type = _type
         pass
 
 
@@ -49,3 +52,4 @@ def get_find_results(query_string: str,
     except Exception as e:
         raise KidexErrorException("Unknown Error occured", e)
     return results
+

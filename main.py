@@ -2,10 +2,14 @@ from ulauncher.api.client.Extension import Extension
 from ulauncher.api.client.EventListener import EventListener
 from ulauncher.api.shared.event import KeywordQueryEvent, ItemEnterEvent
 from ulauncher.api.shared.item.ExtensionResultItem import ExtensionResultItem
+from ulauncher.api.shared.item.ExtensionSmallResultItem import ExtensionSmallResultItem
 from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
 from ulauncher.api.shared.action.ExtensionCustomAction import ExtensionCustomAction
 from ulauncher.api.shared.action.HideWindowAction import HideWindowAction
-from src.functions import KidexErrorException, KidexWarningException, get_find_results
+from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAction
+from ulauncher.api.shared.action.OpenAction import OpenAction
+from src.functions import IndexEntry, KidexErrorException, KidexWarningException, get_find_results
+
 
 class KidexExtension(Extension):
 
@@ -30,7 +34,7 @@ class KeywordQueryEventListener(EventListener):
                 items.append(ExtensionResultItem(icon='images/icon.png',
                                                  name='%s' % entry.basename,
                                                  description='At %s' % entry.path,
-                                                 on_enter=ExtensionCustomAction({}, keep_app_open=True)))
+                                                 on_enter=ExtensionCustomAction(entry, keep_app_open=True)))
 
         except KidexWarningException as e:
             items.append(ExtensionResultItem(
@@ -51,13 +55,29 @@ class KeywordQueryEventListener(EventListener):
 
 class ItemEnterEventListener(EventListener):
     def on_event(self, event, extension):
-        data = event.get_data()
+        entry: IndexEntry = event.get_data()
+
         actions = [
-            ExtensionResultItem(
-                name="Copy",
-                on_enter=HideWindowAction()
+            ExtensionSmallResultItem(
+                name="Open",
+                on_enter=OpenAction(entry.path)
             ),
+            ExtensionSmallResultItem(
+                name="Copy Full Path",
+                on_enter=CopyToClipboardAction(entry.path)
+                ),
         ]
+
+        if entry.type == "directory":
+            actions += [
+            ]
+        else:
+            actions += [
+                ExtensionSmallResultItem(
+                    name="Open parent directory",
+                    on_enter=OpenAction(entry.parent_dir)
+                ),
+            ]
         return RenderResultListAction(actions)
 
 
